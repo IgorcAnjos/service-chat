@@ -30,7 +30,6 @@ module.exports = {
 				SwitchCase: 1,
 			},
 		],
-		'linebreak-style': ['error', 'unix'],
 		'@typescript-eslint/quotes': [
 			'error',
 			'single',

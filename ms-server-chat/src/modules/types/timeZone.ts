@@ -1,3 +1,6 @@
+import Unauthorized from '../error/unauthorized/Unauthorized';
+import { UnauthorizedMessages } from '../error/unauthorized/unauthorizedMessages';
+
 interface TimeZone {
   timeZone: string,
   timeZoneNumber: number,
@@ -18,6 +21,7 @@ const findTimeZone = (value: any) => {
   ) {
     return defaultTimeZoneBR;
   }
+  throw new Unauthorized(UnauthorizedMessages.TIME_ZONE_NOT_ALLOWED);
 };
 
 export { findTimeZone, TimeZone, defaultTimeZoneBR };
