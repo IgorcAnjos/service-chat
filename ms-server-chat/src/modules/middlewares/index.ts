@@ -1,65 +1,55 @@
-import { NextFunction, Request, Response } from 'express';
-import httpStatus from 'http-status';
-import { findContentLanguage, ContentLanguage } from './contentLanguages';
-import { findTimeZone, TimeZone, defaultTimeZoneBR } from '../types/timeZone';
+import { NextFunction, Request } from 'express';
+import { findTimeZone, TimeZone } from '../types/timeZone';
 import { verify } from 'jsonwebtoken';
+import { API_JWT_TOKEN } from '../environment';
+import Unauthorized from '../error/unauthorized/Unauthorized';
+import { UnauthorizedMessages } from '../error/unauthorized/unauthorizedMessages';
 
 interface TokenData {
   userId?: string;
-  password?: string;
-  error?: string;
+  createTokenDateTime?: string;
 }
 
 export interface Session {
-  contentLanguage: ContentLanguage,
   timeZone: TimeZone;
-  tokenData: TokenData | undefined;
+  tokenData: TokenData;
 }
 
-class loginMiddleware {
+class LoginMiddleware {
   public sessinData: Session;
 
-  constructor (req: Request, res: Response, next: NextFunction) {
+  constructor (req: Request, next: NextFunction) {
+    this.sessinData = this.handleLogin(req);
+    next();
   }
 
-  handleLogin(req: Request, res: Response, next: NextFunction) {
-    const Session = this.createSessionData(req);
-    const loginData = this.getLoginData(req);
-  }
-
-  createSessionData(req: Request): Session {
-    return {
-      contentLanguage: findContentLanguage(req.headers['content-language']),
-      timeZone: findTimeZone(req.headers['time-zone'])!,
-      tokenData: undefined
+  handleLogin(req: Request) {
+    const session: Session = {
+      timeZone: findTimeZone(req.headers['time-zone']),
+      tokenData: this.getLoginData(req)
     };
+    return session;
   }
 
-  getLoginData(req: Request): TokenData | undefined {
+  getLoginData(req: Request): TokenData {
     const result: TokenData = {};
 
-    const headerAuthorization = req.headers.authorization || '';
+    const headerAuthorization = req.headers.authorization ?? '';
     const token = headerAuthorization.replace('Bearer', '').trim();
-    const data: any = verify(token, API_JWT_TOKEN || '');
 
     if (!token) {
-      result.httpStatus = httpStatus.UNAUTHORIZED;
-      result.httpMessage = 'Unauthorized';
-      return result;
+      throw new Unauthorized(UnauthorizedMessages.TOKEN_NOT_FOUND);
     }
+
+    const data: any = verify(token, API_JWT_TOKEN);
+
+    result.createTokenDateTime = data.createTokenDateTime;
+    result.userId = data.userId;
+
+    // Definir o período em que o token é funcional
+
+    return result;
   }
 }
-// export async function loginMidleware(req: Request, res: Response, next: NextFunction) {
-//   try {
-//     /* PUBLIC HEAD DATA */
-//     if (!req.sessionData) {
-//       req.sessionData = defaultSessionData;
-//     }
 
-//     req.sessionData.appOrigin = AppOrigin.eAppOriginOmnichannel;
-//     req.sessionData.contentLanguage = publicData.contentLanguage;
-//     req.sessionData.timeZone = publicData.timeZone;
-//   } catch (err) {
-//     console.log(err);
-//   }
-// }
+export { LoginMiddleware };
