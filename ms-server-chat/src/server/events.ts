@@ -1,4 +1,4 @@
-import { Events, EmitReturnOptions, EventData } from '../modules/Server/webSocket/eventsTypes';
+import { Events, EmitReturnOptions, EventData } from '../modules/Server/web-socket/eventsTypes';
 
 export const events: Events[] = [
   {
