@@ -1,5 +1,5 @@
 import { Server } from './modules/Server';
-import WebSocketInstance from './modules/Server/webSocket/WebSocketInstance';
+import WebSocketInstance from './modules/Server/webSocket';
 import { events } from './server/events';
 import { routers } from './server/routers';
 
