@@ -1,25 +1,26 @@
+/* DEVELOPMENT */
+DROP TABLE IF EXISTS chats_user_account_details;
+DROP INDEX IF EXISTS idx_user_acc_det_email;
+DROP INDEX IF EXISTS idx_user_acc_det_telephone;
+/* DEVELOPMENT */
+
 CREATE TABLE chats_user_account_details(
-  user_id        BIGINT IDENTITY NOT NULL,
-  user_email_id  VARCHAR(100)    NULL,
-  user_telephone VARCHAR(20)     NULL
+  user_id        INT  IDENTITY NOT NULL,
+  user_email     TEXT NULL,
+  user_telephone TEXT NULL,
+  /* PRIMARY KEY */
+    CONSTRAINT pk_chats_user_account_details PRIMARY KEY(user_id),
+  /* FOREIGN KEY */
+    CONSTRAINT fk_chats_users_account_details FOREIGN KEY(user_id) REFERENCES chats_users(user_id),
+  /* CONSTRAINT CHECKS */
+    CONSTRAINT ck_chats_acc_det_email_length CHECK(LENGTH(user_email) <= 100),
+    CONSTRAINT ck_chats_acc_det_telephone_length CHECK(LENGTH(user_telephone) <= 20)
 );
 
--- PRIMARY KEY
-ALTER TABLE chats_user_account_details
-ADD CONSTRAINT pk_chats_user_account_details
-PRIMARY KEY(user_id);
+CREATE UNIQUE INDEX idx_user_acc_det_email
+ON chats_user_account_details(user_email)
+WHERE user_email IS NOT NULL;
 
--- FOREIGN KEY
-ALTER TABLE chats_user_account_details
-ADD CONSTRAINT fk_chats_users_account_details
-FOREIGN KEY(user_id)
-REFERENCES chats_users(user_id);
-
--- CONSTRAINT CHECKS
-ALTER TABLE chats_user_account_details
-ADD CONSTRAINT ck_chats_acc_det_email_tel
-CHECK (
-  user_email_id IS NULL AND user_telephone IS NULL
-  OR
-  user_email_id IS NOT NULL AND user_telephone IS NOT NULL
-);
+CREATE UNIQUE INDEX idx_user_acc_det_telephone
+ON chats_user_account_details(user_telephone)
+WHERE user_telephone IS NOT NULL;
