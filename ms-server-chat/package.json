@@ -4,8 +4,9 @@
 	"main": "index.js",
 	"scripts": {
 		"dev": "nodemon",
-		"build": "tsc",
-		"prod": "node dist/server.js"
+		"clear": "rimraf dist",
+		"build": "yarn clear && tsc",
+		"prod": "node dist/index.js"
 	},
 	"license": "MIT",
 	"devDependencies": {

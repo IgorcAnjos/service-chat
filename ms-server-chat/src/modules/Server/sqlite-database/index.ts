@@ -1,30 +1,26 @@
 import sqlite3 from 'sqlite3';
+import { ConfigDb, Migration, ModeDbOptions, } from './types';
 
-export enum MigrationType {
-  CREATE = 'create',
-  UPDATE = 'update',
-  DROP = 'drop'
-}
+export class Database extends sqlite3.Database {
+  errorConnection = false;
+  constructor (configDb: ConfigDb) {
+    const initConnectCallback = (idConnection: string) => {
+      const errorMessage = (err: Error) => `[${idConnection}] | Não foi possível inicializar a conexão com o banco de dados: ${err.message}`;
+      const successMessage = `[${idConnection}] | Conexão criada com sucesso.`;
+      const callback = (err: Error | null) => {
+        if (err) {
+          console.error(errorMessage(err));
+          return;
+        }
+        console.info(successMessage);
+      };
 
-export enum openDBOption {
-  SELECT = sqlite3.OPEN_READONLY,
-  SELECT_INSERT = sqlite3.OPEN_READWRITE,
-  CREATE = sqlite3.OPEN_CREATE
-}
-
-export interface Migration {
-  name: string;
-  type: MigrationType;
-  comand: string;
-}
-
-export class SqliteDatabase extends sqlite3.Database {
-  constructor (fileName: string) {
-    const callbackInitializeDatabase = (err: Error | null) => {
-      if (err) console.log(err.message, fileName);
-      return;
+      return callback;
     };
-    super(fileName, callbackInitializeDatabase);
+
+    if (configDb.mode) configDb.mode = ModeDbOptions.SELECT_INSERT;
+
+    super(configDb.fileName, configDb.mode, initConnectCallback(configDb.idConnection));
   }
 
   async executeMigrations(migrations: Migration[]) {
@@ -35,7 +31,7 @@ export class SqliteDatabase extends sqlite3.Database {
     }
   }
 
-  closeDb() {
+  private closeDb() {
     this.close((err) => {
       if (err) {
         console.log(err);

@@ -1,5 +1,7 @@
 import { Server } from './modules/Server';
-import { SqliteDatabase } from './modules/Server/sqlite-database';
+import { Database } from './modules/Server/sqlite-database';
+import { ConfigDb } from './modules/Server/sqlite-database/types';
+
 import WebSocketInstance from './modules/Server/web-socket';
 import { migrationsList } from './server/db.migrations';
 import { events } from './server/events';
@@ -10,7 +12,12 @@ const webSocketServer = new WebSocketInstance(server.serverHttp);
 webSocketServer.addEvent(events);
 webSocketServer.initSocket();
 
-const sqliteDatabase = new SqliteDatabase('./data/database.db');
+const configDb: ConfigDb = {
+  fileName: './data/database.db',
+  idConnection: 'AllMigrations'
+};
+
+const sqliteDatabase = new Database(configDb);
 
 sqliteDatabase.executeMigrations(migrationsList);
 
